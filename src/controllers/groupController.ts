@@ -65,3 +65,22 @@ export const addMemberToGroup = (req: Request, res: Response): void => {
 
   res.status(201).json(newMember);
 };
+
+export const getAllGroups = (_req: Request, res: Response): void => {
+  res.status(200).json(groups);
+};
+
+export const getGroupById = (req: Request, res: Response): void => {
+  const { groupId } = req.params;
+
+  const group = groups.find((g) => g.id === groupId);
+
+  if (!group) {
+    res.status(404).json({
+      message: "Group not found",
+    });
+    return;
+  }
+
+  res.status(200).json(group);
+};
