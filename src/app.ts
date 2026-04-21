@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import groupRoutes from "./routes/groupRoutes";
 
 dotenv.config();
 
@@ -13,14 +14,16 @@ app.get("/", (_req, res) => {
 
 app.get("/health", (_req, res) => {
   res.status(200).json({
-    status: "UP",
+    status: "UP"
   });
 });
 
 app.get("/version", (_req, res) => {
   res.status(200).json({
-    version: process.env.APP_VERSION || "1.0.0",
+    version: process.env.APP_VERSION || "1.0.0"
   });
 });
+
+app.use("/groups", groupRoutes);
 
 export default app;
