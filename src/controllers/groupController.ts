@@ -3,6 +3,10 @@ import { groups } from "../data/store";
 import { Group } from "../models/Group";
 import { Member } from "../models/Member";
 import { Expense } from "../models/Expense";
+import {
+  calculateBalances,
+  calculateSettlements,
+} from "../services/expenseService";
 
 export const createGroup = (req: Request, res: Response): void => {
   const { name } = req.body;
@@ -175,27 +179,7 @@ export const getGroupBalances = (req: Request, res: Response): void => {
     return;
   }
 
-  const balances: Record<string, number> = {};
-
-  group.members.forEach((member) => {
-    balances[member.id] = 0;
-  });
-
-  group.expenses.forEach((expense) => {
-    const splitAmount = expense.amount / expense.participantIds.length;
-
-    balances[expense.paidByMemberId] += expense.amount;
-
-    expense.participantIds.forEach((participantId) => {
-      balances[participantId] -= splitAmount;
-    });
-  });
-
-  const result = group.members.map((member) => ({
-    memberId: member.id,
-    memberName: member.name,
-    balance: Number(balances[member.id].toFixed(2)),
-  }));
+  const result = calculateBalances(group);
 
   res.status(200).json(result);
 };
@@ -207,76 +191,12 @@ export const getGroupSettlements = (req: Request, res: Response): void => {
 
   if (!group) {
     res.status(404).json({
-      message: "Group not found"
+      message: "Group not found",
     });
     return;
   }
 
-  const balances: Record<string, number> = {};
-
-  group.members.forEach((member) => {
-    balances[member.id] = 0;
-  });
-
-  group.expenses.forEach((expense) => {
-    const splitAmount = expense.amount / expense.participantIds.length;
-
-    balances[expense.paidByMemberId] += expense.amount;
-
-    expense.participantIds.forEach((participantId) => {
-      balances[participantId] -= splitAmount;
-    });
-  });
-
-  const creditors = group.members
-    .map((member) => ({
-      memberId: member.id,
-      memberName: member.name,
-      amount: Number(balances[member.id].toFixed(2))
-    }))
-    .filter((member) => member.amount > 0)
-    .sort((a, b) => b.amount - a.amount);
-
-  const debtors = group.members
-    .map((member) => ({
-      memberId: member.id,
-      memberName: member.name,
-      amount: Number(Math.abs(balances[member.id]).toFixed(2))
-    }))
-    .filter((member) => balances[member.memberId] < 0)
-    .sort((a, b) => b.amount - a.amount);
-
-  const settlements = [];
-
-  let creditorIndex = 0;
-  let debtorIndex = 0;
-
-  while (creditorIndex < creditors.length && debtorIndex < debtors.length) {
-    const creditor = creditors[creditorIndex];
-    const debtor = debtors[debtorIndex];
-
-    const paymentAmount = Math.min(creditor.amount, debtor.amount);
-    const roundedPaymentAmount = Number(paymentAmount.toFixed(2));
-
-    settlements.push({
-      fromMemberId: debtor.memberId,
-      fromMemberName: debtor.memberName,
-      toMemberId: creditor.memberId,
-      toMemberName: creditor.memberName,
-      amount: roundedPaymentAmount
-    });
-
-    creditor.amount = Number((creditor.amount - roundedPaymentAmount).toFixed(2));
-    debtor.amount = Number((debtor.amount - roundedPaymentAmount).toFixed(2));
-
-    if (creditor.amount === 0) {
-      creditorIndex++;
-    }
-
-    if (debtor.amount === 0) {
-      debtorIndex++;
-    }
-  }
+  const settlements = calculateSettlements(group);
 
   res.status(200).json(settlements);
 };
