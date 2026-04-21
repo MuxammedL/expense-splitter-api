@@ -94,57 +94,57 @@ export const addExpenseToGroup = (req: Request, res: Response): void => {
 
   if (!group) {
     res.status(404).json({
-      message: "Group not found"
+      message: "Group not found",
     });
     return;
   }
 
   if (!title || typeof title !== "string") {
     res.status(400).json({
-      message: "Expense title is required"
+      message: "Expense title is required",
     });
     return;
   }
 
   if (typeof amount !== "number" || amount <= 0) {
     res.status(400).json({
-      message: "Amount must be a number greater than 0"
+      message: "Amount must be a number greater than 0",
     });
     return;
   }
 
   if (!paidByMemberId || typeof paidByMemberId !== "string") {
     res.status(400).json({
-      message: "paidByMemberId is required"
+      message: "paidByMemberId is required",
     });
     return;
   }
 
   if (!Array.isArray(participantIds) || participantIds.length === 0) {
     res.status(400).json({
-      message: "participantIds must be a non-empty array"
+      message: "participantIds must be a non-empty array",
     });
     return;
   }
 
   const payerExists = group.members.some(
-    (member) => member.id === paidByMemberId
+    (member) => member.id === paidByMemberId,
   );
 
   if (!payerExists) {
     res.status(400).json({
-      message: "Paid by member does not exist in this group"
+      message: "Paid by member does not exist in this group",
     });
     return;
   }
 
   const allParticipantsExist = participantIds.every((participantId: string) =>
-    group.members.some((member) => member.id === participantId)
+    group.members.some((member) => member.id === participantId),
   );
 
   if (!allParticipantsExist) {
     res.status(400).json({
-      message: "One or more participantIds do not exist in this group"
+      message: "One or more participantIds do not exist in this group",
     });
     return;
   }
@@ -155,10 +155,48 @@ export const addExpenseToGroup = (req: Request, res: Response): void => {
     amount,
     paidByMemberId,
     participantIds,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
 
   group.expenses.push(newExpense);
 
   res.status(201).json(newExpense);
 };
+
+export const getGroupBalances = (req: Request, res: Response): void => {
+  const { groupId } = req.params;
+
+  const group = groups.find((g) => g.id === groupId);
+
+  if (!group) {
+    res.status(404).json({
+      message: "Group not found",
+    });
+    return;
+  }
+
+  const balances: Record<string, number> = {};
+
+  group.members.forEach((member) => {
+    balances[member.id] = 0;
+  });
+
+  group.expenses.forEach((expense) => {
+    const splitAmount = expense.amount / expense.participantIds.length;
+
+    balances[expense.paidByMemberId] += expense.amount;
+
+    expense.participantIds.forEach((participantId) => {
+      balances[participantId] -= splitAmount;
+    });
+  });
+
+  const result = group.members.map((member) => ({
+    memberId: member.id,
+    memberName: member.name,
+    balance: Number(balances[member.id].toFixed(2)),
+  }));
+
+  res.status(200).json(result);
+};
+
