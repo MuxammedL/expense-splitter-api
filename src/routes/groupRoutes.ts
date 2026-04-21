@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+    addExpenseToGroup,
   addMemberToGroup,
   createGroup,
   getAllGroups,
@@ -10,6 +11,7 @@ const router = Router();
 
 router.post("/", createGroup);
 router.post("/:groupId/members", addMemberToGroup);
+router.post("/:groupId/expenses", addExpenseToGroup);
 router.get("/", getAllGroups);
 router.get("/:groupId", getGroupById);
 
