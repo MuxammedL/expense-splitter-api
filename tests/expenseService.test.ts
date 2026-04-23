@@ -3,6 +3,7 @@ import {
   calculateSettlements,
 } from "../src/services/expenseService";
 import { Group } from "../src/models/Group";
+import { describe, it, expect } from "@jest/globals";
 
 describe("expenseService", () => {
   const sampleGroup: Group = {
