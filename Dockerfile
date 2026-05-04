@@ -19,6 +19,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
+COPY public ./public
 
 ENV PORT=3000
 ENV APP_VERSION=1.0.0

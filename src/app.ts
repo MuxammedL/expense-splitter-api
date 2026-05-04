@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import path from "path";
 import groupRoutes from "./routes/groupRoutes";
 
 dotenv.config();
@@ -7,6 +8,7 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "../public")));
 
 app.get("/", (_req, res) => {
   res.send("Expense Splitter API is running");

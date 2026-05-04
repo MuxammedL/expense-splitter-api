@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="az">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Expense Splitter API UI</title>
+    <style>
+      :root {
+        --bg: #f4f6f8;
+        --card: #ffffff;
+        --text: #20262e;
+        --muted: #6b7785;
+        --accent: #1663be;
+        --success: #0f766e;
+        --danger: #b42318;
+        --warning: #b45309;
+        --purple: #7c3aed;
+        --border: #dde3ea;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background: linear-gradient(180deg, #eef3f8 0%, var(--bg) 100%);
+        color: var(--text);
+      }
+
+      .container {
+        max-width: 1080px;
+        margin: 32px auto;
+        padding: 0 16px 32px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 18px rgba(27, 39, 51, 0.04);
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        font-size: 21px;
+      }
+
+      h3 {
+        margin: 0 0 8px;
+        font-size: 16px;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      code {
+        background: #f7f9fc;
+        border: 1px solid #edf1f6;
+        padding: 1px 5px;
+        border-radius: 5px;
+      }
+
+      input,
+      textarea,
+      select,
+      button {
+        font: inherit;
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        background: #fff;
+      }
+
+      textarea {
+        min-height: 90px;
+        resize: vertical;
+      }
+
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #334155;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .field {
+        margin-bottom: 10px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      button {
+        border: 1px solid transparent;
+        border-radius: 8px;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .btn-secondary {
+        background: #fff;
+        border-color: var(--border);
+      }
+
+      .btn-danger {
+        background: #fff;
+        border-color: #f2b8b5;
+        color: var(--danger);
+      }
+
+      .btn-success {
+        background: var(--success);
+        color: #fff;
+      }
+
+      .status {
+        margin-top: 10px;
+        min-height: 20px;
+        color: var(--muted);
+      }
+
+      .result {
+        margin-top: 10px;
+        padding: 12px;
+        overflow: auto;
+        background: #f7f9fc;
+        border: 1px solid #edf1f6;
+        border-radius: 8px;
+        font-size: 12px;
+        min-height: 44px;
+        white-space: pre-wrap;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      li {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+      }
+
+      .item-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: start;
+      }
+
+      .item-title {
+        margin: 0;
+        font-weight: 700;
+      }
+
+      .item-meta {
+        margin-top: 5px;
+        font-size: 12px;
+        color: var(--muted);
+        word-break: break-all;
+      }
+
+      .member-chip {
+        display: inline-block;
+        margin: 6px 6px 0 0;
+        padding: 4px 7px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: #f7f9fc;
+        font-size: 12px;
+      }
+
+      .api-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .api-endpoint {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+      }
+
+      .api-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 8px;
+      }
+
+      .method {
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        border-radius: 6px;
+        padding: 3px 8px;
+      }
+
+      .method.get {
+        background: var(--success);
+      }
+
+      .method.post {
+        background: var(--accent);
+      }
+
+      .method.delete {
+        background: var(--danger);
+      }
+
+      .path {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .endpoint-desc {
+        margin-bottom: 10px;
+      }
+
+      .spec {
+        display: grid;
+        gap: 6px;
+      }
+
+      .spec-row {
+        font-size: 13px;
+        color: #334155;
+      }
+
+      pre {
+        margin: 8px 0 0;
+        padding: 10px;
+        overflow: auto;
+        background: #f7f9fc;
+        border: 1px solid #edf1f6;
+        border-radius: 8px;
+        font-size: 12px;
+      }
+
+      @media (max-width: 760px) {
+        .grid,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="container">
+      <section class="card">
+        <h1>Expense Splitter API UI</h1>
+        <p>Bu səhifə ilə API-ləri browser-dən test edə bilərsən. Default base URL: <code>http://localhost:3000</code></p>
+      </section>
+
+      <section class="card">
+        <h2>Connection</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="base-url">Base URL</label>
+            <input id="base-url" value="http://localhost:3000" />
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <div class="actions">
+              <button type="button" class="btn-secondary" id="check-health">Check Health</button>
+              <button type="button" class="btn-secondary" id="check-version">Check Version</button>
+              <button type="button" class="btn-secondary" id="refresh-groups">Refresh Groups</button>
+            </div>
+          </div>
+        </div>
+        <div id="connection-status" class="status"></div>
+        <pre id="connection-result" class="result">No request yet.</pre>
+      </section>
+
+      <section class="card">
+        <h2>Create Group</h2>
+        <form id="group-form">
+          <div class="field">
+            <label for="group-name">Group name</label>
+            <input id="group-name" type="text" placeholder="Weekend Trip" required />
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn-primary">Create Group</button>
+          </div>
+        </form>
+        <div id="group-status" class="status"></div>
+      </section>
+
+      <section class="card">
+        <h2>Selected Group</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="group-select">Group</label>
+            <select id="group-select">
+              <option value="">No group selected</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <div class="actions">
+              <button type="button" class="btn-secondary" id="load-group-details">Load Details</button>
+              <button type="button" class="btn-success" id="load-balances">Get Balances</button>
+              <button type="button" class="btn-success" id="load-settlements">Get Settlements</button>
+            </div>
+          </div>
+        </div>
+        <pre id="selected-group-result" class="result">Select or create a group.</pre>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>Add Member</h2>
+          <form id="member-form">
+            <div class="field">
+              <label for="member-name">Member name</label>
+              <input id="member-name" type="text" placeholder="Ali" required />
+            </div>
+            <div class="actions">
+              <button type="submit" class="btn-primary">Add Member</button>
+            </div>
+          </form>
+          <div id="member-status" class="status"></div>
+        </div>
+
+        <div class="card">
+          <h2>Add Expense</h2>
+          <form id="expense-form">
+            <div class="field">
+              <label for="expense-title">Expense title</label>
+              <input id="expense-title" type="text" placeholder="Dinner" required />
+            </div>
+
+            <div class="field">
+              <label for="expense-amount">Amount</label>
+              <input id="expense-amount" type="number" min="0.01" step="0.01" placeholder="90" required />
+            </div>
+
+            <div class="field">
+              <label for="payer-select">Paid by</label>
+              <select id="payer-select">
+                <option value="">Select payer</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="participants-select">Participants</label>
+              <select id="participants-select" multiple size="5"></select>
+              <p style="margin-top: 5px; font-size: 12px">Ctrl/Cmd ilə bir neçə member seç.</p>
+            </div>
+
+            <div class="actions">
+              <button type="submit" class="btn-primary">Add Expense</button>
+            </div>
+          </form>
+          <div id="expense-status" class="status"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Groups</h2>
+        <ul id="group-list"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Quick Demo</h2>
+        <p style="margin-bottom: 12px">Bir click ilə demo data yarat: group + 3 member + 90 AZN expense.</p>
+        <div class="actions">
+          <button type="button" class="btn-primary" id="run-demo">Run Demo Scenario</button>
+        </div>
+        <pre id="demo-result" class="result">Demo has not run yet.</pre>
+      </section>
+
+      <section class="card">
+        <h2>API Reference</h2>
+        <p style="margin-bottom: 12px">Base URL: <code>http://localhost:3000</code></p>
+
+        <div class="api-grid">
+          <article class="api-endpoint">
+            <div class="api-head">
+              <span class="method get">GET</span>
+              <span class="path">/</span>
+            </div>
+            <p class="endpoint-desc">Root endpoint. API-nin işlədiyini göstərir.</p>
+            <div class="spec">
+              <div class="spec-row"><strong>Body:</strong> none</div>
+              <div class="spec-row"><strong>200:</strong> <code>Expense Splitter API is running</code></div>
+            </div>
+            <pre>curl http://localhost:3000/</pre>
+          </article>
+
+          <article class="api-endpoint">
+            <div class="api-head">
+              <span class="method get">GET</span>
+              <span class="path">/health</span>
+            </div>
+            <p class="endpoint-desc">Service health status.</p>
+            <div class="spec">
+              <div class="spec-row"><strong>Body:</strong> none</div>
+              <div class="spec-row"><strong>200:</strong> <code>{"status":"UP"}</code></div>
+            </div>
+            <pre>curl http://localhost:3000/health</pre>
+          </article>
+
+          <article class="api-endpoint">
+            <div class="api-head">
+              <span class="method get">GET</span>
+              <span class="path">/version</span>
+            </div>
+            <p class="endpoint-desc">App version.</p>
+            <div class="spec">
+              <div class="spec-row"><strong>Body:</strong> none</div>
+              <div class="spec-row"><strong>200:</strong> <code>{"version":"1.0.0"}</code></div>
+            </div>
+            <pre>curl http://localhost:3000/version</pre>
+          </article>
+
+          <article class="api-endpoint">
+            <div class="api-head">
+              <span class="method post">POST</span>
+              <span class="path">/groups</span>
+            </div>
+            <p class="endpoint-desc">Create a new group.</p>
+            <div class="spec">
+              <div class="spec-row"><strong>Body:</strong> <code>{"name":"Weekend Trip"}</code></div>
+              <div class="spec-row"><strong>201:</strong> created group</div>
+              <div class="spec-row"><strong>400:</strong> <code>{"message":"Group name is required"}</code></div>
+            </div>
+            <pre>curl -X POST http://localhost:3000/groups \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Weekend Trip"}'</pre>
+          </article>
+
+          <article class="api-endpoint">
+            <div class="api-head">
+              <span class="method get">GET</span>
+              <span class="path">/groups</span>
+            </div>
+            <p class="endpoint-desc">List all groups.</p>
+            <div class="spec">
+              <div class="spec-row"><strong>Body:</strong> none</div>
+              <div class="spec-row"><strong>200:</strong> group array</div>
+            </div>
+            <pre>curl http://localhost:3000/groups</pre>
+          </article>
+
+          <article class="api-endpoint">
+            <div class="api-head">
+              <span class="method get">GET</span>
+              <span class="path">/groups/{groupId}</span>
+            </div>
+            <p class="endpoint-desc">Get group details.</p>
+            <div class="spec">
+              <div class="spec-row"><strong>Path params:</strong> <code>groupId</code></div>
+              <div class="spec-row"><strong>404:</strong> <code>{"message":"Group not found"}</code></div>
+            </div>
+            <pre>curl http://localhost:3000/groups/GROUP_ID</pre>
+          </article>
+
+          <article class="api-endpoint">
+            <div class="api-head">
+              <span class="method post">POST</span>
+              <span class="path">/groups/{groupId}/members</span>
+            </div>
+            <p class="endpoint-desc">Add member to group.</p>
+            <div class="spec">
+              <div class="spec-row"><strong>Body:</strong> <code>{"name":"Ali"}</code></div>
+              <div class="spec-row"><strong>201:</strong> created member</div>
+            </div>
+            <pre>curl -X POST http://localhost:3000/groups/GROUP_ID/members \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Ali"}'</pre>
+          </article>
+
+          <article class="api-endpoint">
+            <div class="api-head">
+              <span class="method post">POST</span>
+              <span class="path">/groups/{groupId}/expenses</span>
+            </div>
+            <p class="endpoint-desc">Add shared expense to group.</p>
+            <div class="spec">
+              <div class="spec-row"><strong>Body:</strong> <code>{"title":"Dinner","amount":90,"paidByMemberId":"...","participantIds":["..."]}</code></div>
+              <div class="spec-row"><strong>201:</strong> created expense</div>
+            </div>
+            <pre>curl -X POST http://localhost:3000/groups/GROUP_ID/expenses \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Dinner","amount":90,"paidByMemberId":"ALI_ID","participantIds":["ALI_ID","VELI_ID","AYSE_ID"]}'</pre>
+          </article>
+
+          <article class="api-endpoint">
+            <div class="api-head">
+              <span class="method get">GET</span>
+              <span class="path">/groups/{groupId}/balances</span>
+            </div>
+            <p class="endpoint-desc">Calculate net balances.</p>
+            <div class="spec">
+              <div class="spec-row"><strong>Body:</strong> none</div>
+              <div class="spec-row"><strong>200:</strong> balances result</div>
+            </div>
+            <pre>curl http://localhost:3000/groups/GROUP_ID/balances</pre>
+          </article>
+
+          <article class="api-endpoint">
+            <div class="api-head">
+              <span class="method get">GET</span>
+              <span class="path">/groups/{groupId}/settlements</span>
+            </div>
+            <p class="endpoint-desc">Generate optimized settlements.</p>
+            <div class="spec">
+              <div class="spec-row"><strong>Body:</strong> none</div>
+              <div class="spec-row"><strong>200:</strong> settlements result</div>
+            </div>
+            <pre>curl http://localhost:3000/groups/GROUP_ID/settlements</pre>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const baseUrlInput = document.getElementById("base-url");
+      const connectionStatus = document.getElementById("connection-status");
+      const connectionResult = document.getElementById("connection-result");
+      const groupStatus = document.getElementById("group-status");
+      const memberStatus = document.getElementById("member-status");
+      const expenseStatus = document.getElementById("expense-status");
+      const groupList = document.getElementById("group-list");
+      const groupSelect = document.getElementById("group-select");
+      const payerSelect = document.getElementById("payer-select");
+      const participantsSelect = document.getElementById("participants-select");
+      const selectedGroupResult = document.getElementById("selected-group-result");
+      const demoResult = document.getElementById("demo-result");
+
+      let groups = [];
+
+      function baseUrl() {
+        return baseUrlInput.value.replace(/\/$/, "");
+      }
+
+      function setStatus(element, message, isError = false) {
+        element.textContent = message;
+        element.style.color = isError ? "#b42318" : "#6b7785";
+      }
+
+      function pretty(data) {
+        if (typeof data === "string") return data;
+        return JSON.stringify(data, null, 2);
+      }
+
+      async function fetchAPI(path, options = {}) {
+        const response = await fetch(`${baseUrl()}${path}`, options);
+        const text = await response.text();
+        let data = text;
+
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (_) {
+          data = text;
+        }
+
+        if (!response.ok) {
+          const message = data.message || data.error || `Request failed with ${response.status}`;
+          throw new Error(message);
+        }
+
+        return data;
+      }
+
+      function selectedGroup() {
+        return groups.find((group) => group.id === groupSelect.value);
+      }
+
+      function renderGroups() {
+        groupList.innerHTML = "";
+
+        groupSelect.innerHTML = '<option value="">No group selected</option>';
+        groups.forEach((group) => {
+          const option = document.createElement("option");
+          option.value = group.id;
+          option.textContent = `${group.name} (${group.members.length} members, ${group.expenses.length} expenses)`;
+          groupSelect.appendChild(option);
+        });
+
+        if (!groups.length) {
+          const item = document.createElement("li");
+          item.textContent = "No groups yet.";
+          groupList.appendChild(item);
+          renderMemberSelects(null);
+          return;
+        }
+
+        groups.forEach((group) => {
+          const li = document.createElement("li");
+
+          const head = document.createElement("div");
+          head.className = "item-head";
+
+          const left = document.createElement("div");
+
+          const title = document.createElement("p");
+          title.className = "item-title";
+          title.textContent = group.name;
+
+          const meta = document.createElement("p");
+          meta.className = "item-meta";
+          meta.textContent = `id: ${group.id} | members: ${group.members.length} | expenses: ${group.expenses.length}`;
+
+          const members = document.createElement("div");
+          group.members.forEach((member) => {
+            const chip = document.createElement("span");
+            chip.className = "member-chip";
+            chip.textContent = `${member.name} (${member.id})`;
+            members.appendChild(chip);
+          });
+
+          left.append(title, meta, members);
+
+          const actions = document.createElement("div");
+          actions.className = "actions";
+
+          const selectBtn = document.createElement("button");
+          selectBtn.className = "btn-secondary";
+          selectBtn.textContent = "Select";
+          selectBtn.addEventListener("click", () => {
+            groupSelect.value = group.id;
+            renderMemberSelects(group);
+            selectedGroupResult.textContent = pretty(group);
+          });
+
+          actions.appendChild(selectBtn);
+          head.append(left, actions);
+          li.appendChild(head);
+          groupList.appendChild(li);
+        });
+
+        const current = selectedGroup();
+        renderMemberSelects(current || groups[0]);
+        if (!groupSelect.value && groups[0]) {
+          groupSelect.value = groups[0].id;
+        }
+      }
+
+      function renderMemberSelects(group) {
+        payerSelect.innerHTML = '<option value="">Select payer</option>';
+        participantsSelect.innerHTML = "";
+
+        if (!group) return;
+
+        group.members.forEach((member) => {
+          const payerOption = document.createElement("option");
+          payerOption.value = member.id;
+          payerOption.textContent = `${member.name} (${member.id})`;
+          payerSelect.appendChild(payerOption);
+
+          const participantOption = document.createElement("option");
+          participantOption.value = member.id;
+          participantOption.textContent = `${member.name} (${member.id})`;
+          participantOption.selected = true;
+          participantsSelect.appendChild(participantOption);
+        });
+      }
+
+      async function loadGroups() {
+        groups = await fetchAPI("/groups");
+        renderGroups();
+        setStatus(connectionStatus, `Loaded ${groups.length} group(s).`);
+        connectionResult.textContent = pretty(groups);
+      }
+
+      async function loadSelectedGroupDetails() {
+        const groupId = groupSelect.value;
+        if (!groupId) throw new Error("Select a group first.");
+
+        const group = await fetchAPI(`/groups/${groupId}`);
+        selectedGroupResult.textContent = pretty(group);
+
+        const index = groups.findIndex((item) => item.id === group.id);
+        if (index >= 0) groups[index] = group;
+        renderGroups();
+        groupSelect.value = group.id;
+        renderMemberSelects(group);
+
+        return group;
+      }
+
+      document.getElementById("check-health").addEventListener("click", async () => {
+        try {
+          const data = await fetchAPI("/health");
+          setStatus(connectionStatus, "Health check OK.");
+          connectionResult.textContent = pretty(data);
+        } catch (error) {
+          setStatus(connectionStatus, error.message, true);
+        }
+      });
+
+      document.getElementById("check-version").addEventListener("click", async () => {
+        try {
+          const data = await fetchAPI("/version");
+          setStatus(connectionStatus, "Version loaded.");
+          connectionResult.textContent = pretty(data);
+        } catch (error) {
+          setStatus(connectionStatus, error.message, true);
+        }
+      });
+
+      document.getElementById("refresh-groups").addEventListener("click", async () => {
+        try {
+          await loadGroups();
+        } catch (error) {
+          setStatus(connectionStatus, error.message, true);
+        }
+      });
+
+      document.getElementById("group-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const name = document.getElementById("group-name").value.trim();
+        if (!name) {
+          setStatus(groupStatus, "Group name is required.", true);
+          return;
+        }
+
+        try {
+          const group = await fetchAPI("/groups", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name }),
+          });
+
+          document.getElementById("group-name").value = "";
+          setStatus(groupStatus, `Group created: ${group.name}`);
+          await loadGroups();
+          groupSelect.value = group.id;
+          await loadSelectedGroupDetails();
+        } catch (error) {
+          setStatus(groupStatus, error.message, true);
+        }
+      });
+
+      groupSelect.addEventListener("change", () => {
+        const group = selectedGroup();
+        renderMemberSelects(group);
+        selectedGroupResult.textContent = group ? pretty(group) : "Select or create a group.";
+      });
+
+      document.getElementById("load-group-details").addEventListener("click", async () => {
+        try {
+          await loadSelectedGroupDetails();
+        } catch (error) {
+          selectedGroupResult.textContent = error.message;
+        }
+      });
+
+      document.getElementById("member-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const groupId = groupSelect.value;
+        const name = document.getElementById("member-name").value.trim();
+
+        if (!groupId) {
+          setStatus(memberStatus, "Select a group first.", true);
+          return;
+        }
+
+        if (!name) {
+          setStatus(memberStatus, "Member name is required.", true);
+          return;
+        }
+
+        try {
+          const member = await fetchAPI(`/groups/${groupId}/members`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name }),
+          });
+
+          document.getElementById("member-name").value = "";
+          setStatus(memberStatus, `Member added: ${member.name}`);
+          await loadGroups();
+          groupSelect.value = groupId;
+          await loadSelectedGroupDetails();
+        } catch (error) {
+          setStatus(memberStatus, error.message, true);
+        }
+      });
+
+      document.getElementById("expense-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const groupId = groupSelect.value;
+        const title = document.getElementById("expense-title").value.trim();
+        const amount = Number(document.getElementById("expense-amount").value);
+        const paidByMemberId = payerSelect.value;
+        const participantIds = Array.from(participantsSelect.selectedOptions).map((option) => option.value);
+
+        if (!groupId) {
+          setStatus(expenseStatus, "Select a group first.", true);
+          return;
+        }
+
+        if (!title || !amount || amount <= 0 || !paidByMemberId || participantIds.length === 0) {
+          setStatus(expenseStatus, "Fill title, amount, payer and participants.", true);
+          return;
+        }
+
+        try {
+          const expense = await fetchAPI(`/groups/${groupId}/expenses`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, amount, paidByMemberId, participantIds }),
+          });
+
+          document.getElementById("expense-title").value = "";
+          document.getElementById("expense-amount").value = "";
+          setStatus(expenseStatus, `Expense added: ${expense.title}`);
+          await loadGroups();
+          groupSelect.value = groupId;
+          await loadSelectedGroupDetails();
+        } catch (error) {
+          setStatus(expenseStatus, error.message, true);
+        }
+      });
+
+      document.getElementById("load-balances").addEventListener("click", async () => {
+        try {
+          const groupId = groupSelect.value;
+          if (!groupId) throw new Error("Select a group first.");
+
+          const data = await fetchAPI(`/groups/${groupId}/balances`);
+          selectedGroupResult.textContent = pretty(data);
+        } catch (error) {
+          selectedGroupResult.textContent = error.message;
+        }
+      });
+
+      document.getElementById("load-settlements").addEventListener("click", async () => {
+        try {
+          const groupId = groupSelect.value;
+          if (!groupId) throw new Error("Select a group first.");
+
+          const data = await fetchAPI(`/groups/${groupId}/settlements`);
+          selectedGroupResult.textContent = pretty(data);
+        } catch (error) {
+          selectedGroupResult.textContent = error.message;
+        }
+      });
+
+      document.getElementById("run-demo").addEventListener("click", async () => {
+        try {
+          const group = await fetchAPI("/groups", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: `Weekend Trip ${Date.now()}` }),
+          });
+
+          const ali = await fetchAPI(`/groups/${group.id}/members`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: "Ali" }),
+          });
+
+          const veli = await fetchAPI(`/groups/${group.id}/members`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: "Veli" }),
+          });
+
+          const ayse = await fetchAPI(`/groups/${group.id}/members`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: "Ayse" }),
+          });
+
+          const expense = await fetchAPI(`/groups/${group.id}/expenses`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: "Dinner",
+              amount: 90,
+              paidByMemberId: ali.id,
+              participantIds: [ali.id, veli.id, ayse.id],
+            }),
+          });
+
+          const balances = await fetchAPI(`/groups/${group.id}/balances`);
+          const settlements = await fetchAPI(`/groups/${group.id}/settlements`);
+
+          await loadGroups();
+          groupSelect.value = group.id;
+          await loadSelectedGroupDetails();
+
+          demoResult.textContent = pretty({
+            group,
+            members: [ali, veli, ayse],
+            expense,
+            balances,
+            settlements,
+          });
+        } catch (error) {
+          demoResult.textContent = error.message;
+        }
+      });
+
+      loadGroups().catch((error) => {
+        setStatus(connectionStatus, `API not reachable: ${error.message}`, true);
+      });
+    </script>
+  </body>
+</html>
