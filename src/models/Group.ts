@@ -6,4 +6,5 @@ export interface Group {
   name: string;
   members: Member[];
   expenses: Expense[];
+  test?: string; // Optional property for testing purposes
 }
