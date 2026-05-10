@@ -5,5 +5,4 @@ export interface Expense {
   paidByMemberId: string;
   participantIds: string[];
   createdAt: string;
-  test?:string;
 }
